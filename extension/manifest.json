@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "tiktok-dl",
+  "name": "TikTok Downloader",
   "version": "0.0.1",
   "description": "Download TikTok Videos",
   "background": {

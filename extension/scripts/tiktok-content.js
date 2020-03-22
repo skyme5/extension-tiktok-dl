@@ -2,6 +2,8 @@ const INPUT_CLASSNAME = "tiktok-response";
 const INPUT_SELECT_QUERY = "input.tiktok-response";
 const INTERCEPT_RESPONSE_URL_TYPE = "TIKTOK_AWEME_LIST";
 const INTERCEPT_USERINFO_URL_TYPE = "TIKTOK_USER_INFO";
+const SAVE_USER_JSON_REQUEST_URL = "http://localhost:8000/user/json";
+const MEDIA_SAVE_PREFIX = "F:/TikTok-in";
 
 function getItemListData(data) {
   return data.body.itemListData;
@@ -36,11 +38,11 @@ function processInputResponse(input) {
     });
   } else if (type == INTERCEPT_USERINFO_URL_TYPE) {
     makeRequest({
-      requestUrl: SAVE_JSON_REQUEST_URL,
+      requestUrl: SAVE_USER_JSON_REQUEST_URL,
       requestData: {
         url: "SAVE_USER_JSON_REQUEST",
         filename: `${data.userInfo.user.id}.json`,
-        directory: `F:/TikTok/${data.userInfo.user.id}`,
+        directory: `${MEDIA_SAVE_PREFIX}/${data.userInfo.user.id}`,
         metadata: {
           json: data
         }
@@ -52,7 +54,7 @@ function processInputResponse(input) {
       requestData: {
         url: data.userInfo.user.avatarLarger,
         filename: data.userInfo.user.avatarLarger.split("/").pop(),
-        directory: `F:/TikTok/${data.userInfo.user.id}`,
+        directory: `${MEDIA_SAVE_PREFIX}/${data.userInfo.user.id}`,
         metadata: {
           location: 'tiktok.com',
           title: 'tiktok',
@@ -69,9 +71,12 @@ function processInput() {
   });
 }
 
+function isAutoDownload(){
+  return window.location.href.includes("autoDownload=true");
+}
 
 var download = true;
-if (confirm("Don't Download ?")) {
+if (!isAutoDownload() && confirm("Don't Download ?")) {
   download = false;
 }
 
@@ -80,6 +85,8 @@ setTimeout(() => {
 
   setInterval(() => {
     processInput();
-    window.scrollTo(0, document.querySelector(".video-feed").scrollHeight);
+    var feed = document.querySelector(".video-feed");
+    if (feed !== null)
+      window.scrollTo(0, feed.scrollHeight);
   }, 1500);
 }, 10000);

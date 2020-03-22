@@ -14,14 +14,27 @@ server = WEBrick::HTTPServer.new(Port: 8000, DocumentRoot: root)
 server.mount_proc '/json' do |req, res|
   data = JSON.parse(req.body)
 
-  FileUtils.mkdir_p(data["directory"]) unless Dir.exist?(data["directory"])
+  FileUtils.mkdir_p(data['directory']) unless Dir.exist?(data['directory'])
 
-  json_file = File.open(File.join(data["directory"], data["filename"]), 'w')
-  json_file.print data["metadata"]["json"]
+  json_file = File.open(File.join(data['directory'], data['filename']), 'w')
+  json_file.print JSON.generate(data['metadata']['json'])
   json_file.close
 
   res['Content-Type'] = 'application/json'
-  res.body = '{success: true}'
+  res.body = JSON.generate({ "success": true })
+end
+
+server.mount_proc '/user/json' do |req, res|
+  data = JSON.parse(req.body)
+
+  FileUtils.mkdir_p(data['directory']) unless Dir.exist?(data['directory'])
+
+  json_file = File.open(File.join(data['directory'], data['filename']), 'w')
+  json_file.print JSON.generate(data['metadata']['json'])
+  json_file.close
+
+  res['Content-Type'] = 'application/json'
+  res.body = JSON.generate({ "success": true })
 end
 
 trap 'INT' do

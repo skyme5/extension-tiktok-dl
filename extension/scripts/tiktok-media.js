@@ -6,31 +6,26 @@ const REQUEST_URL = {
   json: SAVE_JSON_REQUEST_URL
 };
 
-function padZero(number) {
-  if (number < 10){
-    return `0${number}`
-  }
-
-  return `${number}`
-}
-
 function getTimeDateString(timestamp) {
-  // Convert UNIX Timestamp to Date
-  var date = new Date(timestamp * 1000);
+  // Convert UNIX Timestamp to UTC Date
+  var utc = new Date(timestamp * 1000).toISOString();
+  var date = utc.split(".")[0];
+
+  var parts = date.split(/[\-:\T]/g)
 
   return {
-    year: date.getFullYear(),
-    month: padZero(date.getMonth() + 1),
-    day: padZero(date.getDate()),
-    hour: padZero(date.getHours()),
-    minute: padZero(date.getMinutes()),
-    second: padZero(date.getSeconds()),
+    year: parts[0],
+    month: parts[1],
+    day: parts[2],
+    hour: parts[3],
+    minute: parts[4],
+    second: parts[5],
     str: [
-      date.getFullYear(),
-      padZero(date.getMonth() + 1),
-      padZero(date.getDate()) + "_" + padZero(date.getHours()),
-      padZero(date.getMinutes()),
-      padZero(date.getSeconds())
+      parts[0],
+      parts[1],
+      parts[2] + "_" + parts[3],
+      parts[4],
+      parts[5]
     ].join("-")
   };
 }
@@ -65,7 +60,7 @@ function collectMetaFromData(data) {
 
 function pathFormatter(m) {
   return {
-    directory: `F:/TikTok/${m.userId}/${m.time.year}-${m.time.month}`,
+    directory: `${MEDIA_SAVE_PREFIX}/${m.userId}/${m.time.year}-${m.time.month}`,
     video: `${m.time.str} ${m.id}_${m.userId}.mp4`,
     cover: `${m.time.str} ${m.id}_${m.userId}.jpg`,
     json: `${m.time.str} ${m.id}_${m.userId}.json`
@@ -76,7 +71,7 @@ function getMediaForDownload(data) {
   var metaData = collectMetaFromData(data);
   var filepath = pathFormatter(metaData.metaData);
   var list = [];
-  "video cover json".split(" ").forEach((media) => {
+  "video json".split(" ").forEach((media) => {
     list.push({
       requestUrl: REQUEST_URL[media],
       requestData: {

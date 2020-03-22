@@ -8,6 +8,7 @@ function sendRequest(type, url, data) {
           if (http.readyState == 4 && http.status == 200) {
               var contentType = http.getResponseHeader("Content-Type");
               if (contentType.indexOf("json") >= 0) {
+				  console.log(data, http.responseText);
                   resolve(JSON.parse(http.responseText));
               } else {
                   resolve(http.responseText);
