@@ -19,7 +19,7 @@ async def file_exist(request):
         )
     return response.json(
         {},
-        status=400
+        status=404
     )
 
 

@@ -4,6 +4,7 @@ const INTERCEPT_RESPONSE_URL_TYPE = "TIKTOK_AWEME_LIST";
 const INTERCEPT_USERINFO_URL_TYPE = "TIKTOK_USER_INFO";
 const REQUEST_MEDIA_DOWNLOAD_URL = "http://localhost:8000/exist";
 const MEDIA_SAVE_PREFIX = "F:/TikTok-in";
+var HAS_MORE = true;
 
 function getItemListData(data) {
   return data.body.itemListData;
@@ -37,7 +38,7 @@ function makeMediaRequest(data) {
       if (!response.success) {
         chrome.runtime.sendMessage({
             action: "request",
-            url: data.requestUrl + "23",
+            url: data.requestUrl,
             type: "POST",
             data: data.requestData
           },
@@ -55,6 +56,7 @@ function processInputResponse(input) {
   var data = JSON.parse(input.value);
 
   if (type == INTERCEPT_RESPONSE_URL_TYPE) {
+    HAS_MORE = data.body.hasMore;
     // Download User AWEMEs
     getItemListData(data).forEach(aweme => {
       getMediaForDownload(aweme).forEach((item) => {
@@ -79,11 +81,14 @@ function processInputResponse(input) {
     });
 
     // Download Profile Picture
+	var filename = data.userInfo.user.avatarLarger.split("/").pop();
+	if (filename.indexOf('.jpg') < 0)
+		filename += '.jpg';
     makeMediaRequest({
       requestUrl: REQUEST_URL.cover,
       requestData: {
         url: data.userInfo.user.avatarLarger,
-        filename: data.userInfo.user.avatarLarger.split("/").pop(),
+        filename: filename,
         directory: `${MEDIA_SAVE_PREFIX}/${data.userInfo.user.id}`,
         metadata: {
           location: 'tiktok.com',
@@ -116,7 +121,7 @@ setTimeout(() => {
   setInterval(() => {
     processInput();
     var feed = document.querySelector(".video-feed");
-    if (feed !== null)
+    if (HAS_MORE && feed !== null)
       window.scrollTo(0, feed.scrollHeight);
   }, 1500);
 }, 10000);
