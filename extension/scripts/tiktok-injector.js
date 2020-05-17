@@ -11,7 +11,7 @@ function checkForDOM (data) {
   if (document.head) {
     injectInterceptScript(data)
   } else {
-    setTimeout(() => { checkForDOM() }, 1)
+    checkForDOM(data)
   }
 }
 

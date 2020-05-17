@@ -2,8 +2,8 @@ const INPUT_CLASSNAME = "tiktok-response";
 const INPUT_SELECT_QUERY = "input.tiktok-response";
 const INTERCEPT_RESPONSE_URL_TYPE = "TIKTOK_AWEME_LIST";
 const INTERCEPT_USERINFO_URL_TYPE = "TIKTOK_USER_INFO";
-const REQUEST_MEDIA_DOWNLOAD_URL = "http://localhost:8000/exist";
-const MEDIA_SAVE_PREFIX = "F:/TikTok-in";
+const REQUEST_MEDIA_DOWNLOAD_URL = "http://localhost:3234/exist";
+const MEDIA_SAVE_PREFIX = "F:/TikTok";
 var HAS_MORE = true;
 
 function getItemListData(data) {
@@ -74,9 +74,7 @@ function processInputResponse(input) {
         url: "SAVE_USER_JSON_REQUEST",
         filename: `${data.userInfo.user.id}.json`,
         directory: `${MEDIA_SAVE_PREFIX}/${data.userInfo.user.id}`,
-        metadata: {
-          json: data
-        }
+        data: JSON.stringify(data)
       }
     });
 
@@ -92,8 +90,7 @@ function processInputResponse(input) {
         directory: `${MEDIA_SAVE_PREFIX}/${data.userInfo.user.id}`,
         metadata: {
           location: 'tiktok.com',
-          title: 'tiktok',
-          json: {}
+          title: 'tiktok'
         }
       }
     });

@@ -14,6 +14,20 @@ XHR.send = function () {
   this.addEventListener("load", function (e) {
     if (this.url.includes(INTERCEPT_RESPONSE_URL)) {
       appendToDOM(e.target.responseText, INTERCEPT_RESPONSE_URL_TYPE);
+      // userDetailsRequest(this.url.split('_signature=').pop(), __NEXT_DATA__.query.uniqueId);
+
+      var data = {
+        body: {
+          hasMore: true,
+          itemABParams: [],
+          itemListData: [],
+          maxCursor: "1576854650000",
+          minCursor: "1586923609000",
+          pageState: {}
+        },
+        errMsg: null,
+        statusCode: 0
+      }
     }
 
     if (this.url.includes(INTERCEPT_USERINFO_URL)) {
@@ -47,4 +61,13 @@ function appendToDOM(data, type) {
   input.value = data;
 
   document.body.appendChild(input);
+}
+
+function userDetailsRequest(_signature, uniqueId) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {}
+  };
+  xhr.open("GET", `https://t.tiktok.com/api/user/detail/?uniqueId=${uniqueId}&language=en&verifyFp=&_signature=${_signature}`, true);
+  xhr.send();
 }

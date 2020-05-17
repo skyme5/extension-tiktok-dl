@@ -1,5 +1,5 @@
 const DOWNLOAD_REQUEST_URL = "http://localhost/api/v2/downloader";
-const SAVE_JSON_REQUEST_URL = "http://localhost:8000/json";
+const SAVE_JSON_REQUEST_URL = "http://localhost:3234/json";
 const REQUEST_URL = {
   cover: DOWNLOAD_REQUEST_URL,
   video: DOWNLOAD_REQUEST_URL,
@@ -78,10 +78,11 @@ function getMediaForDownload(data) {
         url: metaData.urls[media],
         filename: filepath[media],
         directory: filepath.directory,
+        data: JSON.stringify(data),
         metadata: {
           location: 'tiktok.com',
           title: 'tiktok',
-          json: media == 'json' ? data : {}
+          json: {}
         }
       }
     });
