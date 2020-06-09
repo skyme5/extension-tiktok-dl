@@ -4,14 +4,14 @@ function injectInterceptScript (data) {
   var xhrOverrideScript = document.createElement('script')
   xhrOverrideScript.type = 'text/javascript'
   xhrOverrideScript.innerHTML = data;
-  document.head.prepend(xhrOverrideScript)
+  document.body.append(xhrOverrideScript)
 }
 
 function checkForDOM (data) {
-  if (document.head) {
+  if (document.body) {
     injectInterceptScript(data)
   } else {
-    checkForDOM(data)
+    setTimeout(() => {checkForDOM(data)}, 1000);
   }
 }
 

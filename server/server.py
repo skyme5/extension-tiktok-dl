@@ -1,42 +1,44 @@
 #!/usr/bin/env python
 
-import os
 import json
+import os
+import signal
+import sys
+import time
+from queue import Queue
+from threading import Thread, currentThread
+from time import sleep
 
-from sanic import Sanic
-from sanic import response
+from loguru import logger
+from sanic import Sanic, response
+from tiktok_dl import TikTok
 
 app = Sanic(name="TikTok Downloader Backend")
+t = TikTok(
+    output_template="D:/TikTok/{user_id}/{Y}-{m}/{id}_{user_id}",
+    download_archive="C:/msys64/home/sky/tiktok.archive.txt",
+    daemon=True
+)
+
+with open('C:/msys64/home/sky/tiktok.cache.txt', 'r') as f:
+    for i in f.read().split("\n"):
+        t.enqueue(i)
+
+t.run()
 
 
-@app.route('/exist', methods=['POST'])
-async def file_exist(request):
-    data = request.json
-    if os.path.isfile(data['path']):
-        return response.json(
-            {},
-            status=200
-        )
-    return response.json(
-        {},
-        status=404
-    )
-
-
-@app.route('/json', methods=['POST'])
+@app.route("/url", methods=["POST"])
 async def save_json(request):
     data = request.json
-    directory = data['directory']
-    filename = data['filename']
-    if not os.path.isdir(directory):
-        os.makedirs(directory, exist_ok=True)
-
-    filepath = os.path.join(directory, filename)
-    if not os.path.isfile(filepath):
-        with open(filepath, 'w') as f:
-            json.dump(data['metadata']['json'], f)
+    logger.info("Download Request {}", data["url"])
+    t.enqueue(data["url"])
 
     return response.json({"received": True})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+
+if __name__ == "__main__":
+    try:
+        app.run(host="0.0.0.0", port=3234)
+        print('running server')
+    except KeyboardInterrupt:
+        sys.exit(0)

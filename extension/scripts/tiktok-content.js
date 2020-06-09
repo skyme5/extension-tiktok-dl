@@ -1,124 +1,62 @@
-const INPUT_CLASSNAME = "tiktok-response";
-const INPUT_SELECT_QUERY = "input.tiktok-response";
-const INTERCEPT_RESPONSE_URL_TYPE = "TIKTOK_AWEME_LIST";
-const INTERCEPT_USERINFO_URL_TYPE = "TIKTOK_USER_INFO";
-const REQUEST_MEDIA_DOWNLOAD_URL = "http://localhost:3234/exist";
-const MEDIA_SAVE_PREFIX = "F:/TikTok";
+const REQUEST_MEDIA_DOWNLOAD_URL = "http://localhost:3234/url";
+const TITOK_URL_SELECTOR = ".video-feed-item-wrapper";
+const TITOK_URL_DONE = "tdl";
 var HAS_MORE = true;
 
-function getItemListData(data) {
-  return data.body.itemListData;
-}
-
-function getUserInfoData(data) {
-  return data.userInfo;
-}
-
 function makeRequest(data) {
-  chrome.runtime.sendMessage({
-      action: "request",
-      url: data.requestUrl,
-      type: "POST",
-      data: data.requestData
-    },
-    function (response) {}
-  );
-}
-
-function makeMediaRequest(data) {
-  chrome.runtime.sendMessage({
-      action: "request",
-      url: REQUEST_MEDIA_DOWNLOAD_URL,
-      type: "POST",
-      data: {
-        path: `${data.requestData.directory}/${data.requestData.filename}`
-      }
-    },
-    function (response) {
-      if (!response.success) {
-        chrome.runtime.sendMessage({
+    chrome.runtime.sendMessage({
             action: "request",
             url: data.requestUrl,
             type: "POST",
-            data: data.requestData
-          },
-          function (response) {}
-        );
-      }
-    }
-  );
+            data: data.requestData,
+        },
+        function(response) {}
+    );
 }
 
-function processInputResponse(input) {
-  input.classList.remove(INPUT_CLASSNAME);
-
-  var type = input.getAttribute("data-type");
-  var data = JSON.parse(input.value);
-
-  if (type == INTERCEPT_RESPONSE_URL_TYPE) {
-    HAS_MORE = data.body.hasMore;
-    // Download User AWEMEs
-    getItemListData(data).forEach(aweme => {
-      getMediaForDownload(aweme).forEach((item) => {
-        if (item.requestUrl == SAVE_JSON_REQUEST_URL)
-          makeRequest(item);
-        else
-          makeMediaRequest(item);
-      });
-    });
-  } else if (type == INTERCEPT_USERINFO_URL_TYPE) {
-    // Download User JSON
+function processInputResponse(url) {
     makeRequest({
-      requestUrl: SAVE_JSON_REQUEST_URL,
-      requestData: {
-        url: "SAVE_USER_JSON_REQUEST",
-        filename: `${data.userInfo.user.id}.json`,
-        directory: `${MEDIA_SAVE_PREFIX}/${data.userInfo.user.id}`,
-        data: JSON.stringify(data)
-      }
+        requestUrl: REQUEST_MEDIA_DOWNLOAD_URL,
+        requestData: {
+            url: url,
+        },
     });
-
-    // Download Profile Picture
-	var filename = data.userInfo.user.avatarLarger.split("/").pop();
-	if (filename.indexOf('.jpg') < 0)
-		filename += '.jpg';
-    makeMediaRequest({
-      requestUrl: REQUEST_URL.cover,
-      requestData: {
-        url: data.userInfo.user.avatarLarger,
-        filename: filename,
-        directory: `${MEDIA_SAVE_PREFIX}/${data.userInfo.user.id}`,
-        metadata: {
-          location: 'tiktok.com',
-          title: 'tiktok'
-        }
-      }
-    });
-  }
 }
 
 function processInput() {
-  document.querySelectorAll(INPUT_SELECT_QUERY).forEach(input => {
-    processInputResponse(input);
-  });
+    document.querySelectorAll(TITOK_URL_SELECTOR).forEach((link) => {
+				if(!link.classList.contains(TITOK_URL_DONE)) {
+					link.classList.add(TITOK_URL_DONE);
+					processInputResponse(link.href);
+				}
+    });
 }
 
 function isAutoDownload() {
-  return window.location.href.includes("autoDownload=true");
+    return window.location.href.includes("autoDownload=true");
 }
 
-var download = true;
-if (!isAutoDownload() && confirm("Don't Download ?")) {
-  download = false;
-}
-
-setTimeout(() => {
-  if (!download) return;
-
+function downloadStart() {
   setInterval(() => {
-    processInput();
-    var feed = document.querySelector(".video-feed");
-    if (HAS_MORE && feed !== null)
-      window.scrollTo(0, feed.scrollHeight);
-  }, 1500);
-}, 10000);
+        processInput();
+        var feed = document.querySelector(".video-feed");
+        if (HAS_MORE && feed !== null) window.scrollTo(0, feed.scrollHeight);
+    }, 1500);
+}
+
+// var download = false;
+// if (!isAutoDownload() && confirm("Don't Download ?")) {
+    // download = false;
+// }
+
+// setTimeout(() => {
+    // if (!download) return;
+    // downloadStart()
+// }, 10000);
+
+let id = setInterval(()=> {
+  if (document.body.getAttribute('data-start') === 'start' || document.location.href.includes('download')) {
+    downloadStart()
+    clearInterval(id);
+  }
+}, 1000)

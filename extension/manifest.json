@@ -1,32 +1,20 @@
 {
-  "manifest_version": 2,
-  "name": "TikTok Downloader",
-  "version": "0.0.1",
-  "description": "Download TikTok Videos",
-  "background": {
-    "persistent": false,
-    "scripts": [
-      "deps/browser-polyfill.js",
-      "background.js"
+    "manifest_version": 2,
+    "name": "TikTok Downloader",
+    "version": "0.0.1",
+    "description": "Download TikTok Videos",
+    "background": {
+        "persistent": false,
+        "scripts": ["deps/browser-polyfill.js", "background.js"]
+    },
+    "content_scripts": [{
+        "run_at": "document_start",
+        "matches": ["https://www.tiktok.com/@*"],
+        "js": ["deps/browser-polyfill.js", "scripts/tiktok-content.js", "scripts/tiktok-injector.js"]
+    }],
+    "permissions": ["activeTab", "http://localhost:8000/*", "http://localhost/*"],
+    "web_accessible_resources": [
+        "deps/browser-polyfill.js.map",
+        "scripts/tiktok-inject.js"
     ]
-  },
-  "content_scripts": [{
-    "run_at" :"document_start",
-    "matches": ["https://www.tiktok.com/*"],
-    "js": [
-      "deps/browser-polyfill.js",
-      "scripts/tiktok-injector.js",
-      "scripts/tiktok-media.js",
-      "scripts/tiktok-content.js"
-    ]
-  }],
-  "permissions": [
-    "activeTab",
-    "http://localhost:8000/*",
-    "http://localhost/*"
-  ],
-  "web_accessible_resources": [
-    "deps/browser-polyfill.js.map",
-    "scripts/tiktok-inject.js"
-  ]
 }
